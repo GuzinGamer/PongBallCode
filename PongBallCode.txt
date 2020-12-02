@@ -1,0 +1,212 @@
+using System;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
+
+namespace prong
+{
+    class retangulo
+    {
+        public int x;
+        public int y;
+
+        public int largura;
+        public int altura;
+    }
+
+    class Program : GameWindow
+    {
+        retangulo bola;
+
+        retangulo jogador1;
+        retangulo jogador2;
+        retangulo obs;
+        
+        int velocidadeDaBolaX = 3;
+        int velocidadeDaBolaY = 3;
+        int scorep1 = 0;
+        int scorep2 = 0;
+        int tamanho = 10;
+        int tempo = 5;
+        int tempo2 = 3;
+
+        protected override void OnUpdateFrame(FrameEventArgs e)
+        {
+            bola.x = bola.x + velocidadeDaBolaX;
+            bola.y = bola.y + velocidadeDaBolaY;
+
+            if (bola.x + bola.largura / 2 > jogador2.x - jogador2.largura / 2 
+             && bola.y - bola.altura / 2 < jogador2.y + jogador2.altura / 2 
+             && bola.y + bola.altura / 2 > jogador2.y - jogador2.altura / 2)
+            {
+                if (tempo2 <= 0)
+                {
+                    velocidadeDaBolaX++;
+                    velocidadeDaBolaY++;
+                    tempo2 = 4;
+                }
+                velocidadeDaBolaX = -velocidadeDaBolaX;
+                tempo--;
+                tempo2--;
+                if (tempo <= 0 && tamanho > 3)
+                {
+                    tamanho--;
+                    tempo = 5;
+                    jogador1.altura = bola.altura * tamanho;
+                    jogador2.altura = bola.altura * tamanho;
+                }
+            }
+            if (bola.x - bola.largura / 2 < jogador1.x + jogador1.largura / 2
+             && bola.y - bola.altura / 2 < jogador1.y + jogador1.altura / 2
+             && bola.y + bola.altura / 2 > jogador1.y - jogador1.altura / 2)
+            {
+                if (tempo2 <= 0)
+                {
+                    velocidadeDaBolaX--;
+                    velocidadeDaBolaY--;
+                    tempo2 = 4;
+                }
+                velocidadeDaBolaX = -velocidadeDaBolaX;
+                tempo2--;
+                tempo--;
+                if (tempo <= 0 && tamanho > 3)
+                {
+                    tamanho--;
+                    tempo = 5;
+                    jogador1.altura = bola.altura * tamanho;
+                    jogador2.altura = bola.altura * tamanho;
+                }
+            }
+            if (bola.y + bola.altura / 2 > ClientSize.Height / 2)
+            {
+                velocidadeDaBolaY = -velocidadeDaBolaY;
+            }
+            if (bola.y - bola.altura / 2 < -ClientSize.Height / 2)
+            {
+                velocidadeDaBolaY = -velocidadeDaBolaY;
+            }
+
+            if (bola.x < -ClientSize.Width / 2)
+            {
+                bola.x = 0;
+                bola.y = 0;
+                velocidadeDaBolaX = 3;
+                velocidadeDaBolaY = 3;
+                scorep2++;
+                Console.WriteLine("Player1: " + scorep1 + "   " + scorep2 + " :Player2");
+                Console.WriteLine("");
+                tamanho = 10;
+                jogador1.altura = bola.altura * tamanho;
+                jogador2.altura = bola.altura * tamanho;
+            }
+            if (bola.x > ClientSize.Width / 2)
+            {
+                bola.x = 0;
+                bola.y = 0;
+                velocidadeDaBolaX = 3;
+                velocidadeDaBolaY = 3;
+                scorep1++;
+                Console.WriteLine("Player1: " + scorep1 + "   " + scorep2 + " :Player2");
+                Console.WriteLine("");
+                tamanho = 10;
+                jogador1.altura = bola.altura * tamanho;
+                jogador2.altura = bola.altura * tamanho;
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Key.W) && jogador1.y + jogador1.altura / 2 < ClientSize.Height / 2)
+            {
+                jogador1.y = jogador1.y + 5;
+            }
+            if (Keyboard.GetState().IsKeyDown(Key.S) && jogador1.y - jogador1.altura / 2 > -ClientSize.Height / 2)
+            {
+                jogador1.y = jogador1.y - 5;
+            }
+            if (Keyboard.GetState().IsKeyDown(Key.Up) && jogador2.y + jogador2.altura / 2 < ClientSize.Height / 2)
+            {
+                jogador2.y = jogador2.y + 5;
+            }
+            if (Keyboard.GetState().IsKeyDown(Key.Down) && jogador2.y - jogador2.altura / 2 > -ClientSize.Height / 2)
+            {
+                jogador2.y = jogador2.y - 5;
+            }
+
+        }
+
+
+
+        protected override void OnRenderFrame(FrameEventArgs e)
+        {
+            GL.Viewport(0, 0, ClientSize.Width, ClientSize.Height);
+
+            Matrix4 projection = Matrix4.CreateOrthographic(ClientSize.Width, ClientSize.Height, 0.0f, 1.0f);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref projection);
+
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+
+            desenha(0, 0, 700, 700, 0.0f, 0.5f, 0.0f);
+            desenha(obs.x, obs.y, obs.largura, 500, 1.0f, 1.0f, 1.0f);
+            desenha(obs.x - ClientSize.Width / 8, obs.y, obs.largura, 100, 1.0f, 1.0f, 1.0f);
+            desenha(obs.x + ClientSize.Width / 8, obs.y, obs.largura, 100, 1.0f, 1.0f, 1.0f);
+            desenha(obs.x, 50, 150, obs.altura, 1.0f, 1.0f, 1.0f);
+            desenha(obs.x, -50, 150, obs.altura, 1.0f, 1.0f, 1.0f);
+            desenha(bola.x, bola.y, bola.largura, bola.altura, 0.0f, 0.0f, 0.0f);
+            desenha(bola.x, bola.y, bola.largura / 2, bola.altura / 2, 1.0f, 1.0f, 1.0f);
+            desenha(jogador1.x, jogador1.y, jogador1.largura, jogador1.altura, 1.0f, 0.0f, 0.0f);
+            desenha(jogador1.x, jogador1.y, jogador1.largura, 40, 1.0f, 1.0f, 1.0f);
+            desenha(jogador2.x, jogador2.y, jogador2.largura, jogador2.altura, 0.0f, 0.0f, 1.0f);
+            desenha(jogador2.x, jogador2.y, jogador2.largura, 40, 1.0f, 1.0f, 1.0f);
+
+            SwapBuffers();
+        }
+
+        void desenha(int x, int y, int largura, int altura, float r, float g, float b)
+        {
+            GL.Color3(r, g, b);
+
+            GL.Begin(PrimitiveType.Quads);
+            GL.Vertex2(-0.5f * largura + x, -0.5f * altura + y);
+            GL.Vertex2(0.5f * largura + x, -0.5f * altura + y);
+            GL.Vertex2(0.5f * largura + x, 0.5f * altura + y);
+            GL.Vertex2(-0.5f * largura + x, 0.5f * altura + y);
+            GL.End();
+        }
+
+        static retangulo CriarRetangulo(int x, int y, int largura, int altura)
+        {
+
+            retangulo r = new retangulo();
+            r.x = x;
+            r.y = y;
+            r.largura = largura;
+            r.altura = altura;
+
+            return r;
+        }
+
+        static void Main()
+        {
+            Console.WriteLine("=============Pong==============");
+            Console.WriteLine("Chame uma pessoa e jogue com ela");
+            Console.WriteLine("Aperte Enter para continuar");
+            Console.WriteLine("=============Ball==============");
+            while (!Keyboard.GetState().IsKeyDown(Key.Enter))
+            {
+
+            }
+
+            Program p = new Program();
+
+            p.bola = CriarRetangulo(0, 0, 20, 20);
+
+            int larguraplayers = p.bola.largura;
+            int alturaplayers = p.bola.altura * p.tamanho;
+            p.jogador1 = CriarRetangulo(-p.ClientSize.Width / 2 + larguraplayers / 2, 0, larguraplayers, alturaplayers);
+            p.jogador2 = CriarRetangulo(p.ClientSize.Width / 2 - larguraplayers / 2, 0, larguraplayers, alturaplayers);
+            p.obs = CriarRetangulo(0, 0, 20, 20);
+
+            p.Run();
+
+        }
+    }
+}
